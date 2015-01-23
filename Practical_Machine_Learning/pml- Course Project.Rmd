@@ -1,0 +1,85 @@
+---
+title: "PML-Course Project WriteUp"
+date: "Friday, January 23, 2015"
+output: html_document
+---
+
+## Synopsis
+
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.
+
+In this project, we use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants while they perform barbell lifts correctly and incorrectly in 5 different ways to predict how good are they excercising.
+
+## Loading the required Libraries
+```{r}
+set.seed(2108)
+library(caret)
+library(randomForest)
+library(kernlab)
+library(corrplot)
+```
+
+##Data Processing
+
+Reading the training and test data csv files.
+```{r)}
+pml_Train <- read.csv("pml-training.csv", na.strings= c("NA",""," "))
+pml_Test <- read.csv("pml-testing.csv", na.strings= c("NA",""," "))
+```
+Cleaning and preprocessing the data by removing the columns with `NA` values.
+```{r}
+##Training Data
+pml_Train_NAs <- apply(pml_Train, 2, function(x) {sum(is.na(x))})
+pml_Train_clean <- pml_Train[,which(pml_Train_NAs == 0)]
+##Test Data
+pml_Test_NAs <- apply(pml_Test, 2, function(x) {sum(is.na(x))})
+pml_Test_clean <- pml_Test[,which(pml_Test_NAs == 0)]
+```
+
+ Also, in order to remove any spurious correlation and also reduce the processing time, the first 7 columns (metadata) that do not contribute in the analysis are also removed. The removed columns include the following labels:
+
+1. `the unlabled row index`
+2. `user_name`
+3. `raw_timestamp_part_1`
+4. `raw_timestamp_part_2`
+5. `cvtd_timestamp`
+6. `new_window`
+7. `num_window`
+
+```{r}
+pml_Train_clean <- pml_Train_clean[8:length(pml_Train_clean)]
+##Cleaning the test data as well.
+pml_Test_clean <- pml_Test_clean[8:length(pml_Test_clean)]
+```
+
+##Data Partitioning
+We split up the cleaned data into training (70%) and cross validation (30%) data sets.
+```{r}
+training <- createDataPartition(y = pml_Train_clean$classe, p = 0.7, 
+                               list = FALSE)
+data_Train <- pml_Train_clean[training, ]
+data_CrossVal <- pml_Train_clean[-training, ]
+```
+##Model Building
+We use random forest method for building our model as it is one of the best algorithms to classify large amounts of data with accuracy.
+```{r}
+rf_Model <- randomForest(classe ~ ., data = data_Train)
+rf_Model
+```
+The **OOB estimate of  error rate is 0.55%** which is very small. It seems the model is quite robust and it should give a low out of sample error rate.
+
+##Cross Validation of the model
+Now, we use the remaining data to cross validate the model to see the accuracy of the model.
+```{r}
+predictCrossVal <- predict(rf_Model, data_CrossVal)
+confusionMatrix(data_CrossVal$classe, predictCrossVal)
+```
+The model yields a accuracy of 99.54 %, which is quite high. Hence, the out of sample error is .46 % which is quite low.
+
+##Model Prediction
+Now, using the test data set we predict the classification of the 20 different test cases.              
+```{r}
+predict_TestData <- predict(rf_Model, pml_Test_clean)
+print(predict_TestData)
+```
+
