@@ -1,0 +1,60 @@
+---
+title       : "IRIS Flower Data Set"
+subtitle    : "Developing Data Product- Course Project"
+author      : "JMandrake"
+job         : "Data Science Enthusiast"
+framework   : io2012        # {io2012, html5slides, shower, dzslides, ...}
+highlighter : highlight.js  # {highlight.js, prettify, highlight}
+hitheme     : tomorrow      # 
+widgets     : []            # {mathjax, quiz, bootstrap}
+mode        : selfcontained # {standalone, draft}
+knit        : slidify::knit2slides
+---
+
+## About IRIS Flower Data Set
+
+- A multivariate data set introduced by Sir Ronald Fisher (1936) as an example of discriminant analysis.
+- The data set consists of 50 samples from each of three species of Iris:
+        
+        1. Iris setosa
+        2. Iris virginica
+        3. Iris versicolor
+- Four features were measured (in cm) from each sample:
+
+        - Sepal length and width
+        - Petal length and width
+- In this slidify deck we present exploratory data analysis with this data set.
+
+---
+
+## Loading IRIS Data and Summarizing.
+
+```{r}
+library(datasets) #Load dataset library
+data(iris) #Load iris dataset
+summary(iris)
+```
+
+---
+
+## Box Plot for Different Species
+
+```{r, echo=FALSE}
+par(mfrow=c(2, 2))
+boxplot(Sepal.Length~ Species, data = iris, main = "Sepal Length vs Species" )
+boxplot(Sepal.Width~ Species, data = iris, main = "Sepal Width vs Species")
+boxplot(Petal.Length~ Species, data = iris, main = "Petal Length vs Species")
+boxplot(Petal.Width~ Species, data = iris, main = "Petal Width vs Species")
+```
+
+---
+
+## Scatter Plot for different species
+
+```{r, echo=FALSE}
+pairs(iris[,1:4],col=iris$Species, main = "Iris Flower Data Set")
+```
+
+
+
+
